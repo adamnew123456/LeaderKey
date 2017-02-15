@@ -3,7 +3,6 @@ package org.leaderkey.config;
 import org.leaderkey.Leader;
 import org.leaderkey.LeaderAction;
 import org.leaderkey.LeaderGroup;
-import org.leaderkey.LeaderKey;
 import org.leaderkey.LeaderPrompt;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ import java.util.Map;
  *   string ::= C-style string (sans octal)
  */
 public class Parser {
-    private static int EOF = 0;
+    private static int EOF = -1;
     private Reader reader;
     private int current_char;
     private Map<String, Character> key_names;
@@ -99,7 +98,7 @@ public class Parser {
             throw new SyntaxException("Saw EOF, expected one of " + allowed);
         }
 
-        String char_string = String.valueOf(current_char);
+        String char_string = String.valueOf((char)current_char);
         if (allowed.contains(char_string)) {
             read();
             return char_string.charAt(0);
@@ -112,7 +111,7 @@ public class Parser {
      * Consumes a chunk of whitespace.
      */
     private void chomp() throws SyntaxException {
-        while (current_char != EOF && Character.isWhitespace(current_char)) {
+        while (current_char != EOF && Character.isWhitespace((char)current_char)) {
             read();
         }
     }
@@ -125,7 +124,11 @@ public class Parser {
         StringBuilder builder = new StringBuilder();
 
         boolean escaped = false;
-        while (current_char != EOF) {
+        while (true) {
+            if (current_char == EOF) {
+                throw new SyntaxException("EOF found in string-like");
+            }
+
             char current = (char)current_char;
             if (escaped) {
                 escaped = false;
@@ -161,12 +164,14 @@ public class Parser {
                     read();
                 }
             } else if (current == escape) {
-                escaped = true;
                 read();
+                escaped = true;
             } else if (current == delimiter) {
                 read();
+                break;
             } else {
                 builder.append(current);
+                read();
             }
         }
 
@@ -178,10 +183,10 @@ public class Parser {
      */
     private Leader parseSubRule() throws SyntaxException {
         if (current_char == EOF) {
-            throw new SyntaxException("Expected subcommand");
+            throw new SyntaxException("Expected subcommand, saw EOF");
         } else if ((char)current_char == '[') {
             acceptIfIsIn("[");
-            String var = parseStringLike('[', '\\');
+            String var = parseStringLike(']', '\\');
 
             chomp();
             acceptIfIsIn("\"");
@@ -197,7 +202,8 @@ public class Parser {
             String action = parseStringLike('`', '\\');
             return new LeaderAction(action);
         } else {
-            throw new SyntaxException("Expected subrule");
+            throw new SyntaxException("Expected subrule, saw " +
+                                      (char)current_char);
         }
     }
 
@@ -207,7 +213,7 @@ public class Parser {
     private Pair<Character, Leader> parseRule() throws SyntaxException {
         char key_character;
         if (current_char == EOF) {
-            throw new SyntaxException("Expected rule");
+            throw new SyntaxException("Expected rule, saw EOF");
         } else if ((char)current_char == '<') {
             read();
 
@@ -215,13 +221,13 @@ public class Parser {
             if (key_names.containsKey(key_name)) {
                 key_character = key_names.get(key_name);
             } else {
-                throw new SyntaxException("Expected key");
+                throw new SyntaxException("Expected key, saw " + key_name);
             }
         } else {
-            acceptIfIsIn("abcdefghijklmnopqrstuvwxyz" +
-                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-                         "0123456789");
-            key_character = (char)current_char;
+            key_character = acceptIfIsIn(
+                    "abcdefghijklmnopqrstuvwxyz" + 
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + 
+                    "0123456789");
         }
 
 
@@ -231,9 +237,12 @@ public class Parser {
 
         chomp();
         if (current_char == EOF) {
-            throw new SyntaxException("Expecting action or subrule in rule");
+            throw new SyntaxException("Expecting action or subrule in rule, saw EOF");
         } else if ((char)current_char == '{') {
+            read();
+            chomp();
             LeaderGroup group = parseRules(hint);
+            acceptIfIsIn("}");
             return new Pair<Character, Leader>(key_character, group);
         } else {
             Leader subrule = parseSubRule();
@@ -247,12 +256,18 @@ public class Parser {
     private LeaderGroup parseRules(String help) throws SyntaxException {
         LeaderGroup toplevel = new LeaderGroup(help);
 
-        do  {
+        while (true) {
             chomp();
+            if (current_char == EOF) {
+                break;
+            } else if ((char)current_char == '}') {
+                break;
+            }
+
             Pair<Character, Leader> bind = parseRule();
             toplevel.attach(bind.first, bind.second);
             chomp();
-        } while (current_char != EOF);
+        }
 
         return toplevel;
     }
