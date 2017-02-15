@@ -23,6 +23,17 @@ public class LeaderGroup extends Leader {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof LeaderGroup)) {
+            return false;
+        }
+
+        LeaderGroup other_group = (LeaderGroup)other;
+        return other_group.actions.equals(this.actions) &&
+               other_group.hint.equals(this.hint);
+    }
+
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{\n");

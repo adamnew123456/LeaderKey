@@ -22,6 +22,17 @@ public class LeaderPrompt extends Leader {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof LeaderPrompt)) {
+            return false;
+        }
+
+        LeaderPrompt other_prompt = (LeaderPrompt)other;
+        return other_prompt.var.equals(this.var) && 
+            other_prompt.hint.equals(this.var);
+    }
+
+    @Override
     public String toString() {
         return "[" + var + "](" + hint + ") => " + action;
     }

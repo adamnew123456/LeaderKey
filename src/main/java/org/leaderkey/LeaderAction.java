@@ -11,6 +11,16 @@ public class LeaderAction extends Leader {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof LeaderAction)) {
+            return false;
+        }
+
+        LeaderAction other_action = (LeaderAction)other;
+        return other_action.command.equals(this.command);
+    }
+
+    @Override
     public String toString() {
         return "`" + this.command + "`";
     }
