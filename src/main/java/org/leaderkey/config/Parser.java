@@ -210,7 +210,7 @@ public class Parser {
     /**
      * Parses a single rule.
      */
-    private Pair<Character, Leader> parseRule() throws SyntaxException {
+    private Triple<Character, Leader, String> parseRule() throws SyntaxException {
         char key_character;
         if (current_char == EOF) {
             throw new SyntaxException("Expected rule, saw EOF");
@@ -241,20 +241,20 @@ public class Parser {
         } else if ((char)current_char == '{') {
             read();
             chomp();
-            LeaderGroup group = parseRules(hint);
+            LeaderGroup group = parseRules();
             acceptIfIsIn("}");
-            return new Pair<Character, Leader>(key_character, group);
+            return new Triple<Character, Leader, String>(key_character, group, hint);
         } else {
             Leader subrule = parseSubRule();
-            return new Pair<Character, Leader>(key_character, subrule);
+            return new Triple<Character, Leader, String>(key_character, subrule, hint);
         }
     }
 
     /**
      * Parses a group of subactions all bounds to a common leader.
      */
-    private LeaderGroup parseRules(String help) throws SyntaxException {
-        LeaderGroup toplevel = new LeaderGroup(help);
+    private LeaderGroup parseRules() throws SyntaxException {
+        LeaderGroup toplevel = new LeaderGroup();
 
         while (true) {
             chomp();
@@ -264,8 +264,8 @@ public class Parser {
                 break;
             }
 
-            Pair<Character, Leader> bind = parseRule();
-            toplevel.attach(bind.first, bind.second);
+            Triple<Character, Leader, String> bind = parseRule();
+            toplevel.attach(bind.first, bind.second, bind.third);
             chomp();
         }
 
@@ -277,6 +277,6 @@ public class Parser {
      */
     public LeaderGroup parse() throws SyntaxException {
         read();
-        return parseRules("");
+        return parseRules();
     }
 }

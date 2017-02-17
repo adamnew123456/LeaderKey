@@ -25,14 +25,14 @@ public class TestParser {
         try {
             LeaderGroup actual = parser.parse();
 
-            LeaderGroup expected = new LeaderGroup("");
-            LeaderGroup firefox = new LeaderGroup("open firefox");
+            LeaderGroup expected = new LeaderGroup();
+            LeaderGroup firefox = new LeaderGroup();
             LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
             LeaderAction url_command = new LeaderAction("firefox %1");
 
             url_prompt.attach(url_command);
-            firefox.attach('o', url_prompt);
-            expected.attach('f', firefox);
+            firefox.attach('o', url_prompt, "open url");
+            expected.attach('f', firefox, "open firefox");
 
             assertEquals(expected, actual);
         } catch (SyntaxException err) {
@@ -54,16 +54,16 @@ public class TestParser {
         try {
             LeaderGroup actual = parser.parse();
 
-            LeaderGroup expected = new LeaderGroup("");
-            LeaderGroup firefox  = new LeaderGroup("open firefox");
             LeaderAction tab_command = new LeaderAction("firefox");
+            LeaderGroup expected = new LeaderGroup();
+            LeaderGroup firefox  = new LeaderGroup();
             LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
             LeaderAction url_command = new LeaderAction("firefox %1");
 
             url_prompt.attach(url_command);
-            firefox.attach('o', url_prompt);
-            firefox.attach('t', tab_command);
-            expected.attach('f', firefox);
+            firefox.attach('o', url_prompt, "open url");
+            firefox.attach('t', tab_command, "new tab");
+            expected.attach('f', firefox, "open firefox");
 
             assertEquals(expected, actual);
         } catch (SyntaxException err) {

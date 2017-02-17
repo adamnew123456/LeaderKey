@@ -7,19 +7,25 @@ import java.util.Map;
  * This maps a group of starting characters to each of their own actions.
  */
 public class LeaderGroup extends Leader {
-    private String hint;
     private Map<Character, Leader> actions;
+    private Map<Character, String> hints;
 
-    public LeaderGroup(String hint) {
-        this.hint = hint;
+    public LeaderGroup() {
         actions = new HashMap<Character, Leader>();
+        hints = new HashMap<Character, String>();
     }
 
     /**
      * Attaches an action to the group, with the given prefix.
      */
-    public void attach(Character prefix, Leader action) {
+    public void attach(Character prefix, Leader action, String hint) {
         actions.put(prefix, action);
+        hints.put(prefix, hint);
+    }
+
+    @Override
+    public String getHint() {
+        return toString();
     }
 
     @Override
@@ -30,7 +36,7 @@ public class LeaderGroup extends Leader {
 
         LeaderGroup other_group = (LeaderGroup)other;
         return other_group.actions.equals(this.actions) &&
-               other_group.hint.equals(this.hint);
+            other_group.hints.equals(this.hints);
     }
 
     @Override

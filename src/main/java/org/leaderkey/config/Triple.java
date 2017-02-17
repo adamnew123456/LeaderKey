@@ -1,11 +1,13 @@
 package org.leaderkey.config;
 
-public class Pair<T, U> {
+public class Triple<T, U, V> {
     public final T first;
     public final U second;
+    public final V third;
 
-    public Pair(T t, U u) {
+    public Triple(T t, U u, V v) {
         first = t;
         second = u;
+        third = v;
     }
 }
