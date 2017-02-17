@@ -1,5 +1,7 @@
 package org.leaderkey;
 
+import java.util.List;
+
 /**
  * This requests input from the user before moving into the next stage in the
  * pipeline.
@@ -19,6 +21,34 @@ public class LeaderPrompt extends Leader {
      */
     public void attach(Leader action) {
         this.action = action;
+    }
+
+    /**
+     * Preparation for a prompt just involves setting the hint and waiting for
+     * input.
+     */
+    @Override
+    public LeaderUI.UIMode prepareUI(LeaderUI ui, List<String> args) {
+        ui.clearHints();
+        ui.addHint(hint);
+        return LeaderUI.UIMode.WAIT_FOR_PROMPT;
+    }
+
+    /**
+     * Executing a prompt means saving the input and going to the next action.
+     */
+    @Override
+    public Leader execute(String input, List<String> args) {
+        args.add(input);
+        return action;
+    }
+
+    /**
+     * The hint of a prompt is merely its configuration-assigned hint.:
+     */
+    @Override
+    public String getHint() {
+        return hint;
     }
 
     @Override

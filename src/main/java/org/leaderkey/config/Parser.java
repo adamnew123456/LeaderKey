@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * The ConfigParser is responsible for consuming leaderkey configuration
@@ -35,8 +37,11 @@ public class Parser {
     private Reader reader;
     private int current_char;
     private Map<String, Character> key_names;
+    private BiConsumer<String, List<String>> runner;
 
-    public Parser(InputStream stream) {
+    public Parser(InputStream stream,
+                  BiConsumer<String, List<String>> action_runner) {
+        runner = action_runner;
         reader = new InputStreamReader(stream);
         String[][] key_name_values = {
             {"Space", " "},
@@ -155,9 +160,11 @@ public class Parser {
                     read();
                     break;
                 case 'x':
+                    read();
                     char first = acceptIfIsIn("0123456789abcdefABCDEF");
                     char second = acceptIfIsIn("0123456789abcdefABCDEF");
-                    builder.append((char)(Integer.parseInt("" + first + second)));
+                    String hex_int = "" + first + second;
+                    builder.append((char)(Integer.parseInt(hex_int, 16)));
                     break;
                 default:
                     builder.append(current);
@@ -200,7 +207,7 @@ public class Parser {
         } else if ((char)current_char == '`') {
             acceptIfIsIn("`");
             String action = parseStringLike('`', '\\');
-            return new LeaderAction(action);
+            return new LeaderAction(action, runner);
         } else {
             throw new SyntaxException("Expected subrule, saw " +
                                       (char)current_char);
