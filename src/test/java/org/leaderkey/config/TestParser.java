@@ -10,17 +10,24 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 public class TestParser {
+    private static BiConsumer<String, List<String>> EMPTY_RUNNER =
+        (command, args) -> {};
+
+    private Parser parserFromString(String input) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+        return new Parser(stream, EMPTY_RUNNER);
+    }
+
     @Test(timeout=5000)
     public void testParseBasic() {
-        String input =
+        Parser parser = parserFromString(
             "f \"open firefox\" {\n" +
             "    o \"open url\" [url] \"url\" `firefox %1`\n" +
-            "}\n";
-
-        ByteArrayInputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-        Parser parser = new Parser(stream);
+            "}\n");
 
         try {
             LeaderGroup actual = parser.parse();
@@ -28,7 +35,7 @@ public class TestParser {
             LeaderGroup expected = new LeaderGroup();
             LeaderGroup firefox = new LeaderGroup();
             LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
-            LeaderAction url_command = new LeaderAction("firefox %1");
+            LeaderAction url_command = new LeaderAction("firefox %1", EMPTY_RUNNER);
 
             url_prompt.attach(url_command);
             firefox.attach('o', url_prompt, "open url");
@@ -42,23 +49,21 @@ public class TestParser {
 
     @Test(timeout=5000)
     public void testParseMultipleRules() {
-        String input =
+        Parser parser = parserFromString(
             "f \"open firefox\" {\n" +
             "    o \"open url\" [url] \"url\" `firefox %1`\n" +
             "    t \"new tab\" `firefox`\n" +
-            "}\n";
-
-        ByteArrayInputStream stream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-        Parser parser = new Parser(stream);
+            "}\n");
 
         try {
             LeaderGroup actual = parser.parse();
 
-            LeaderAction tab_command = new LeaderAction("firefox");
             LeaderGroup expected = new LeaderGroup();
             LeaderGroup firefox  = new LeaderGroup();
+            LeaderAction tab_command = new LeaderAction("firefox", EMPTY_RUNNER);
+
             LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
-            LeaderAction url_command = new LeaderAction("firefox %1");
+            LeaderAction url_command = new LeaderAction("firefox %1", EMPTY_RUNNER);
 
             url_prompt.attach(url_command);
             firefox.attach('o', url_prompt, "open url");
