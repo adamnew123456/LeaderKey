@@ -94,4 +94,4 @@ Running
 -------
 
 Execute the JAR file with the path to the leader configuration file as an
-argument; `java -jar LeaderKey.jar /path/to/config.leader'
+argument; `java -jar LeaderKey.jar /path/to/config.leader`
