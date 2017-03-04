@@ -15,13 +15,13 @@ public class CommandRunner implements BiConsumer<String, List<String>> {
 
         for (int i = 0; i < command.length(); i++) {
             char cmd_current = command.charAt(i);
-            if (cmd_current == '%' && i + 1 < command.length()) {
+            if (cmd_current == '%' && (i + 1) < command.length()) {
                 char next_char = command.charAt(i + 1);
                 if (Character.isDigit(next_char)) {
                     String digit_string = String.valueOf(next_char);
                     int index = Integer.valueOf(digit_string);
-                    if (index < args.size()) {
-                        command_builder.append(args.get(index));
+                    if (index <= args.size()) {
+                        command_builder.append(args.get(index - 1));
                     } else {
                         command_builder.append("%" + index);
                     }
