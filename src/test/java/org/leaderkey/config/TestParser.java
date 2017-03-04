@@ -1,6 +1,5 @@
 package org.leaderkey.config;
 
-import org.leaderkey.Leader;
 import org.leaderkey.LeaderAction;
 import org.leaderkey.LeaderGroup;
 import org.leaderkey.LeaderPrompt;
@@ -26,7 +25,7 @@ public class TestParser {
     public void testParseBasic() {
         Parser parser = parserFromString(
             "f \"open firefox\" {\n" +
-            "    o \"open url\" [url] \"url\" `firefox %1`\n" +
+            "    o \"open url\" [url] `firefox %1`\n" +
             "}\n");
 
         try {
@@ -34,7 +33,7 @@ public class TestParser {
 
             LeaderGroup expected = new LeaderGroup();
             LeaderGroup firefox = new LeaderGroup();
-            LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
+            LeaderPrompt url_prompt = new LeaderPrompt("url");
             LeaderAction url_command = new LeaderAction("firefox %1", EMPTY_RUNNER);
 
             url_prompt.attach(url_command);
@@ -51,7 +50,7 @@ public class TestParser {
     public void testParseMultipleRules() {
         Parser parser = parserFromString(
             "f \"open firefox\" {\n" +
-            "    o \"open url\" [url] \"url\" `firefox %1`\n" +
+            "    o \"open url\" [url] `firefox %1`\n" +
             "    t \"new tab\" `firefox`\n" +
             "}\n");
 
@@ -62,7 +61,7 @@ public class TestParser {
             LeaderGroup firefox  = new LeaderGroup();
             LeaderAction tab_command = new LeaderAction("firefox", EMPTY_RUNNER);
 
-            LeaderPrompt url_prompt = new LeaderPrompt("url", "url");
+            LeaderPrompt url_prompt = new LeaderPrompt("url");
             LeaderAction url_command = new LeaderAction("firefox %1", EMPTY_RUNNER);
 
             url_prompt.attach(url_command);

@@ -193,15 +193,11 @@ public class Parser {
             throw new SyntaxException("Expected subcommand, saw EOF");
         } else if ((char)current_char == '[') {
             acceptIfIsIn("[");
-            String var = parseStringLike(']', '\\');
-
-            chomp();
-            acceptIfIsIn("\"");
-            String hint = parseStringLike('"', '\\');
+            String hint = parseStringLike(']', '\\');
 
             chomp();
             Leader subrule = parseSubRule();
-            LeaderPrompt rule = new LeaderPrompt(var, hint);
+            LeaderPrompt rule = new LeaderPrompt(hint);
             rule.attach(subrule);
             return rule;
         } else if ((char)current_char == '`') {
